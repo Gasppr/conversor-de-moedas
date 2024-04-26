@@ -8,20 +8,21 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Scanner;
 
 public class Conversao {
 
  public void converter(){
-
-
      Scanner sc = new Scanner(System.in);
-     Cambio cambio;
 
      int opBase , opTarget;
      int op = 1;
-     ArrayList<Cambio> cambios = new ArrayList<>();
+     ArrayList<Log> cambios = new ArrayList<>();
 
      while (op != 0){
 
@@ -33,7 +34,6 @@ public class Conversao {
         System.out.println("***********************************************************");
 
         System.out.println("Qual é a sua moeda?");
-        // pelo menos 6 tipos de moedas
         System.out.println("""
                 1 - BRL (Moeda Brasileira)
                 2 - USD (Moeda Estadunidense)
@@ -80,10 +80,14 @@ public class Conversao {
         System.out.println("Qual é o valor?");
         valor = sc.nextDouble();
 
-        cambio = conversor(base , target, valor);
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Date today = new Date();
+        Cambio cambio = conversor(base , target, valor);
+        Log log = new Log(cambio , dateFormat.format(today));
 
         System.out.println(cambio.toString());
-        cambios.add(cambio);
+
+        cambios.add(log);
 
         System.out.println("**************************************************************");
         System.out.println("Deseja continuar a converter mais um valor? \n 1- CONTINUAR  \n 0- SAIR");
@@ -112,14 +116,14 @@ public Cambio conversor(String base , String target , double valor){
 
  }
 
- public void salvarHistorico(ArrayList<Cambio> cambios){
+ public void salvarHistorico(ArrayList<Log> cambios){
 
      Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
      File historico = new File("historico.json");
      try {
          FileWriter escrita = new FileWriter(historico);
-         for(Cambio cambio : cambios){
+         for(Log cambio : cambios){
              escrita.write(gson.toJson(cambio));
 
          }
