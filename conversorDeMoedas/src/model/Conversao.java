@@ -1,28 +1,33 @@
 package model;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Conversao {
 
  public void converter(){
 
+
      Scanner sc = new Scanner(System.in);
      Cambio cambio;
 
      int opBase , opTarget;
      int op = 1;
+     ArrayList<Cambio> cambios = new ArrayList<>();
 
      while (op != 0){
 
         String base, target;
         double valor;
+
 
         System.out.println("Bem-vindo ao conversor Alura + Oracle");
         System.out.println("***********************************************************");
@@ -78,6 +83,7 @@ public class Conversao {
         cambio = conversor(base , target, valor);
 
         System.out.println(cambio.toString());
+        cambios.add(cambio);
 
         System.out.println("**************************************************************");
         System.out.println("Deseja continuar a converter mais um valor? \n 1- CONTINUAR  \n 0- SAIR");
@@ -85,6 +91,7 @@ public class Conversao {
 
     }
 
+     salvarHistorico(cambios);
      System.out.println("*******************************************************");
      System.out.println("Até a próxima!");
 
@@ -92,7 +99,7 @@ public class Conversao {
 
 public Cambio conversor(String base , String target , double valor){
 
-    URI url = URI.create("https://v6.exchangerate-api.com/v6/9e5316d5b1d9cd8e275aeee0/pair/"+ base +"/"+target+"/" + valor);
+    URI url = URI.create("https://v6.exchangerate-api.com/v6/"+ System.getenv("API_KEY") +"/pair/"+ base +"/"+target+"/" + valor);
     HttpRequest request = HttpRequest.newBuilder().uri(url).build();
 
     try {
@@ -102,6 +109,24 @@ public Cambio conversor(String base , String target , double valor){
     } catch (IOException | InterruptedException e) {
         throw new RuntimeException(e);
     }
+
+ }
+
+ public void salvarHistorico(ArrayList<Cambio> cambios){
+
+     Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+     File historico = new File("historico.json");
+     try {
+         FileWriter escrita = new FileWriter(historico);
+         for(Cambio cambio : cambios){
+             escrita.write(gson.toJson(cambio));
+
+         }
+         escrita.close();
+     } catch (IOException e) {
+         throw new RuntimeException(e);
+     }
 
  }
 
